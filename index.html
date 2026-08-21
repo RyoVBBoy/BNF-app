@@ -84,13 +84,6 @@ input[readonly]{background:var(--s1);color:var(--muted);}
   margin-bottom:8px;font-size:.85rem;font-weight:800;color:var(--acc);}
 .ai-report-body{font-size:.86rem;line-height:1.6;color:var(--text);white-space:pre-wrap;}
 
-.signal-card{background:rgba(29,155,240,.04);border:1px solid var(--bdr);
-  border-radius:12px;margin:12px 16px;padding:12px 14px;}
-.sig-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.sig-title{font-size:.85rem;font-weight:800;color:var(--blue);display:flex;align-items:center;gap:6px;}
-.sig-time{font-size:.7rem;color:var(--muted);font-family:'Courier New',monospace;}
-.sig-body{font-size:.85rem;line-height:1.5;color:var(--text);}
-
 .tool-header{padding:14px 16px 0;background:var(--s1);}
 .tool-title{font-size:1.1rem;font-weight:800;}
 .mode-toggle{display:flex;background:var(--s2);border:1px solid var(--bdr);
@@ -131,8 +124,8 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
 
 .page-hdr{padding:14px 16px 10px;border-bottom:1px solid var(--bdr);}
 .page-hdr h2{font-size:1.1rem;font-weight:800;}
-.agent-card{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;margin:12px 16px;padding:14px;}
-.agent-pulse{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:800;color:var(--acc);}
+.agent-card{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;margin:12px 16px;padding:14px;line-height:1.6;white-space:pre-wrap;}
+.agent-pulse{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
 .pulse-dot{width:8px;height:8px;background:var(--acc);border-radius:50%;box-shadow:0 0 8px var(--acc);animation:blink 1s infinite;}
 
 .key-section{padding:12px 16px;border-bottom:1px solid var(--bdr);background:var(--s1);}
@@ -140,7 +133,7 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
 .key-eye-btn{background:var(--s2);border:1px solid var(--bdr);color:var(--muted);border-radius:10px;padding:0 14px;cursor:pointer;font-size:1rem;}
 .chat-wrap{display:flex;flex-direction:column;height:calc(100dvh - 53px - 68px);}
 .chat-feed{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
-.bubble{max-width:85%;padding:10px 14px;border-radius:18px;font-size:.9rem;line-height:1.5;word-break:break-word;}
+.bubble{max-width:85%;padding:10px 14px;border-radius:18px;font-size:.9rem;line-height:1.5;word-break:break-word;white-space:pre-wrap;}
 .bubble.bnf{background:var(--s2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid var(--bdr);}
 .bubble.user{background:var(--acc);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
 .chat-footer{border-top:1px solid var(--bdr);padding:10px 12px;display:flex;align-items:center;gap:10px;background:var(--black);}
@@ -219,7 +212,7 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
     <div>
       <span class="bnf-qname">B.N.F</span>
       <span class="bnf-qhandle">@market_shadow</span>
-      <div class="bnf-qtext" id="bnf-comment">「AIで同期すると状況コメントが出ます」</div>
+      <div class="bnf-qtext" id="bnf-comment">「地合いと乖離率、板の厚みを見極めて引き付けて買う。」</div>
     </div>
   </div>
 
@@ -232,18 +225,10 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
 
   <div class="ai-report-card">
     <div class="ai-report-hdr">
-      <span><i class="fa-solid fa-brain"></i> AI相場観レポート</span>
+      <span><i class="fa-solid fa-brain"></i> BNFロジック地合い判定</span>
       <span id="ai-report-time" style="font-size:.7rem;color:var(--muted);">未更新</span>
     </div>
-    <div class="ai-report-body" id="ai-report-text">「AI脳内」タブでAPIキーを設定すると、地合い同期時にリアルタイムのAI相場観レポートが生成されます。</div>
-  </div>
-
-  <div class="signal-card">
-    <div class="sig-hdr">
-      <div class="sig-title"><i class="fa-solid fa-bell"></i> 最新全株スキャン結果</div>
-      <div class="sig-time" id="sig-time">--:--:--</div>
-    </div>
-    <div class="sig-body" id="sig-body">「全株スキャン」タブからスキャンを実行すると最新シグナルが表示されます。</div>
+    <div class="ai-report-body" id="ai-report-text">「AI脳内」タブでAPIキーを設定すると、BNFの地合いルールに基づいたリアルタイム相場観レポートが生成されます。</div>
   </div>
 </div>
 
@@ -284,6 +269,7 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
     </div>
     <div class="result-row"><span>必要資金</span><span class="res-val" id="res-capital">-- 円</span></div>
     <div class="result-row"><span>25日線 乖離率</span><span class="res-val" id="res-kairi">-- %</span></div>
+    <div class="result-row"><span>BNF基準値</span><span class="res-val" id="res-threshold" style="font-size:.85rem;color:var(--muted);">--</span></div>
     <div class="result-row"><span>判定</span><span class="res-val" id="res-status" style="font-size:.9rem;">未入力</span></div>
 
     <!-- ターゲット設定 -->
@@ -327,11 +313,15 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
       </div>
     </div>
 
-    <div class="cell">
-      <button class="btn-pill btn-save" onclick="saveLog()">
-        <i class="fa-solid fa-floppy-disk"></i> ログに保存
+    <div class="cell" style="display:flex;gap:8px;">
+      <button class="btn-pill btn-save" style="flex:1;" onclick="saveLog()">
+        <i class="fa-solid fa-floppy-disk"></i> ログ保存
+      </button>
+      <button class="btn-pill btn-acc" style="flex:1;" onclick="evaluateSingleStockWithAI()">
+        <i class="fa-solid fa-brain"></i> AI詳細評価
       </button>
     </div>
+    <div id="single-ai-result" style="padding:0 16px 14px;"></div>
   </div>
 
   <!-- 個別監視リスト -->
@@ -364,18 +354,18 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
 <!-- 全株スキャン -->
 <div id="screen-search" class="screen">
   <div class="page-hdr">
-    <h2>全株スキャン（東証全銘柄対象）</h2>
+    <h2>BNF式 全株スキャン</h2>
   </div>
   <div class="agent-card">
-    <div class="agent-pulse"><div class="pulse-dot"></div>Gemini AIが東証全銘柄をリアルタイム監視</div>
+    <div class="agent-pulse"><div class="pulse-dot"></div>BNFロジックAIが東証全銘柄を監視・スコアリング</div>
   </div>
   <div class="cell">
     <button class="btn-pill btn-acc" id="scan-btn" onclick="runFullMarketScan()">
-      <i class="fa-solid fa-satellite-dish"></i> 東証全銘柄をAIスキャン
+      <i class="fa-solid fa-satellite-dish"></i> BNFロジックで全銘柄AIスキャン
     </button>
     <div class="status-line" id="scan-status"></div>
   </div>
-  <div id="full-scan-results"></div>
+  <div id="full-scan-results" style="padding-bottom:16px;"></div>
 </div>
 
 <!-- AI脳内 -->
@@ -390,12 +380,12 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
       <div id="api-key-status" style="font-size:.75rem;margin-top:6px;color:var(--muted);">未設定</div>
     </div>
     <div style="padding:10px 12px;border-bottom:1px solid var(--bdr);display:flex;gap:8px;flex-wrap:wrap;background:var(--s1);">
-      <button class="tmpl-btn" onclick="sendTmpl('今日の相場を総括して')">今日の相場</button>
-      <button class="tmpl-btn" onclick="sendTmpl('今買っていいですか？')">今買っていい？</button>
-      <button class="tmpl-btn" onclick="sendTmpl('損切りすべきですか？')">損切り判断</button>
+      <button class="tmpl-btn" onclick="sendTmpl('今日の地合い判定と買い候補のセクターを教えて')">地合い＆セクター</button>
+      <button class="tmpl-btn" onclick="sendTmpl('大型半導体株が-12%乖離したけど買い？')">大型株-12%検証</button>
+      <button class="tmpl-btn" onclick="sendTmpl('パニック売りの見極め方と損切り基準は？')">パニック売り＆損切り</button>
     </div>
     <div class="chat-feed" id="chat-box">
-      <div class="bubble bnf">何か地合いや逆張り戦略についてご質問はありますか？</div>
+      <div class="bubble bnf">BNF取引ロジックが組み込まれました。地合い、乖離率、セクター別の逆張り戦略について質問してください。</div>
     </div>
     <div class="chat-footer">
       <input type="text" id="chat-input" placeholder="メッセージを入力..." onkeypress="if(event.key==='Enter')sendChat()">
@@ -432,6 +422,37 @@ input[type="range"]{width:100%;accent-color:var(--acc);height:4px;}
 </div>
 
 <script>
+// --- BNF SYSTEM PROMPT KNOWLEDGE INJECTION ---
+const BNF_SYSTEM_PROMPT = `
+# Role & Goal
+あなたは伝説的トレーダー「BNF（小手川隆）」氏の取引ルールとロジックを忠実に再現する、高度な株式テクニカル分析AIです。
+入力されたリアルタイムの市場データおよび個別銘柄データを評価し、BNF氏の「逆張り（乖離率手法）」に基づいて、最も反発（リバウンド）の可能性が高い「買い候補銘柄」を選定・スコアリングしてください。
+
+# BNF's Core Logic & Strategy
+1. **地合いの判定（Overall Market Trend）**:
+   - 日経平均先物、NYダウ、ドル円の動向を確認する。
+   - 地合いが「底打ち・上昇傾向」にある中での個別銘柄の下落は、絶好のリバウンド（買い）機会とみなす。
+   - 地合い自体が全面安・崩壊状態の場合は、より深い乖離率を要求するか、見送りの判断をする。
+
+2. **移動平均線乖離率（Moving Average Deviation Rate）**:
+   - 25日移動平均線からのマイナス乖離率を最重視する。
+   - 基準値の目安（業種・テーマにより調整する）:
+     - 大型株・ハイテク株: -10%〜-15%以上
+     - 中小型株・新興株: -20%〜-30%以上
+     - 薬品・食品などディフェンシブ株: -7%〜-10%以上
+   - 同業種・セクター内で「その銘柄だけが過剰に売られすぎている（突出し乖離）」状態を強く評価する。
+
+3. **出来高と流動性（Volume & Liquidity）**:
+   - パニック売り（投げ売り）が発生し、一時的に出来高が急増している場面を狙う。
+   - 板（Bid/Ask）が厚く、自分の売買で株価を崩さない流動性がある銘柄に限る。
+
+# Output Format Guidelines
+分析結果を出力する際は、読みやすく整理し、必ず以下の項目を含めてください：
+1. **総合判定（Recommendation Score）**: [S / A / B / C] （Sが最もBNFロジックに合致）
+2. **分析理由（Reasoning）**: 地合い相関、業種別乖離率評価、出来高・流動性
+3. **エントリー・撤退判断（Action Plan）**: リバウンド狙いポイント、損切り・撤退条件
+`;
+
 let geminiApiKey = localStorage.getItem("bnf_gemini_key") || "";
 let isMiniStock  = false;
 let savedLogs    = JSON.parse(localStorage.getItem("bnf_saved_logs")  || "[]");
@@ -474,11 +495,15 @@ function setStockMode(mini){
   calculateMetrics();
 }
 
-async function callGemini(prompt,useSearch=false){
-  if(!geminiApiKey)throw new Error("APIキー未設定");
+async function callGemini(prompt, useSearch=false){
+  if(!geminiApiKey)throw new Error("APIキーが設定されていません。AI脳内タブで入力してください。");
   const genAI=new window.GoogleGenerativeAI(geminiApiKey);
   const tools=useSearch?[{googleSearch:{}}]:undefined;
-  const model=genAI.getGenerativeModel({model:"gemini-2.5-flash",...(tools&&{tools})});
+  const model=genAI.getGenerativeModel({
+    model:"gemini-2.5-flash",
+    systemInstruction: BNF_SYSTEM_PROMPT,
+    ...(tools&&{tools})
+  });
   const result=await model.generateContent(prompt);
   return result.response.candidates[0].content.parts.filter(p=>p.text).map(p=>p.text).join("");
 }
@@ -488,15 +513,15 @@ async function syncMarketWithAI(){
   const btn=document.getElementById('market-sync-btn');
   const st=document.getElementById('market-sync-status');
   btn.disabled=true;btn.innerHTML='同期中...';
-  st.innerText="最新データを検索中...";
+  st.innerText="BNFロジックに基づき最新市況をAI解析中...";
   try{
     const raw=await callGemini(
-      `今日の日本株市場を検索し、以下のJSON形式のみで出力してください。
-{"nikkei":"38500","nikkei_chg":"-1.2","usdjpy":"152.3","usdjpy_chg":"+0.4","down_stocks":1450,"score":35,"status":"パニック売り進行中","comment":"「値下がり1400銘柄を超えて反発局面。引き付けて逆張り。」"}`,
+      `今日の日本株市場（日経平均先物、NYダウ、ドル円、東証値下がり銘柄数）を検索し、以下のJSONフォーマットのみで出力してください。
+{"nikkei":"38500","nikkei_chg":"-1.2","usdjpy":"152.3","usdjpy_chg":"+0.4","down_stocks":1450,"score":35,"status":"パニック売り進行中・地合い評価低下","comment":"地合い崩壊時は通常より深い乖離（-20%〜）を引き付けてエントリー判断を行う。"}`,
       true
     );
     const m=raw.match(/\{[\s\S]*?\}/);
-    if(!m)throw new Error("JSON取得失敗");
+    if(!m)throw new Error("JSONデータの抽出に失敗しました");
     const d=JSON.parse(m[0]);
 
     document.getElementById('mkt-nikkei').innerText=d.nikkei;
@@ -525,16 +550,26 @@ async function syncMarketWithAI(){
 function onToolCodeInput(){
   const code=document.getElementById('tool-code').value;
   const disp=document.getElementById('tool-sector-display');
-  if(!code){disp.value="コード入力で自動判定";return;}
-  if(code.startsWith('6')||code.startsWith('8'))disp.value="ハイテク・半導体";
-  else if(code.startsWith('9'))disp.value="バリュー・大型";
-  else disp.value="新興・グロース";
+  const thresh=document.getElementById('res-threshold');
+  if(!code){disp.value="コード入力で自動判定";thresh.innerText="--";return;}
+
+  if(code.startsWith('6')||code.startsWith('8')){
+    disp.value="大型株・ハイテク";
+    thresh.innerText="目安: -10%〜-15%";
+  }else if(code.startsWith('9')||code.startsWith('1')){
+    disp.value="ディフェンシブ (薬品・食品等)";
+    thresh.innerText="目安: -7%〜-10%";
+  }else{
+    disp.value="中小型・新興グロース";
+    thresh.innerText="目安: -20%〜-30%";
+  }
   calculateMetrics();
 }
 
 function calculateMetrics(){
   const cp=parseFloat(document.getElementById('current-price').value);
   const ma=parseFloat(document.getElementById('ma-value').value);
+  const code=document.getElementById('tool-code').value;
   if(!cp || !ma)return;
 
   const kairi=((cp-ma)/ma)*100;
@@ -542,7 +577,14 @@ function calculateMetrics(){
   
   document.getElementById('res-capital').innerText=(cp*qty).toLocaleString()+" 円";
   document.getElementById('res-kairi').innerText=kairi.toFixed(2)+" %";
-  document.getElementById('res-status').innerText=kairi <= -15 ? "🔥 買いゾーン" : "👁 監視ゾーン";
+  
+  let reqKairi = -15;
+  if(code.startsWith('6')||code.startsWith('8')) reqKairi = -10;
+  else if(code.startsWith('9')||code.startsWith('1')) reqKairi = -7;
+  else reqKairi = -20;
+
+  document.getElementById('res-status').innerText = kairi <= reqKairi ? "🔥 逆張り買候補" : "👁 監視ゾーン";
+  document.getElementById('res-status').style.color = kairi <= reqKairi ? "var(--green)" : "var(--muted)";
   
   onSliderChange();
 }
@@ -568,6 +610,36 @@ function onSliderChange(){
     document.getElementById('tgt-profit-ma').innerText=Math.round(ma).toLocaleString()+" 円";
     const rrr=((ma - cp)/(cp - stopPrice)).toFixed(2);
     document.getElementById('tgt-rrr').innerText=rrr > 0 ? rrr : "--";
+  }
+}
+
+async function evaluateSingleStockWithAI(){
+  const code=document.getElementById('tool-code').value;
+  const cp=document.getElementById('current-price').value;
+  const ma=document.getElementById('ma-value').value;
+  const sector=document.getElementById('tool-sector-display').value;
+  const kairi=document.getElementById('res-kairi').innerText;
+  const container=document.getElementById('single-ai-result');
+
+  if(!code || !cp || !ma){alert("銘柄コード、現在値、25日線を先に力してください。");return;}
+  container.innerHTML="<div class='agent-card'>BNFロジックでAI分析中...</div>";
+
+  const prompt=`
+入力データ:
+- 銘柄コード: ${code}
+- 業種/セクター: ${sector}
+- 現在値: ${cp}円
+- 25日移動平均線: ${ma}円
+- 25日乖離率: ${kairi}
+
+この銘柄のリアルタイムの地合い・出来高・同業種内での過剰な売り（突出し乖離）をWEB検索で確認し、BNFロジックに従ってスコアリングおよび詳細評価を出力してください。
+`;
+
+  try{
+    const res=await callGemini(prompt, true);
+    container.innerHTML=`<div class="agent-card">${res}</div>`;
+  }catch(e){
+    container.innerHTML=`<div class="agent-card" style="color:var(--red);">エラー: ${e.message}</div>`;
   }
 }
 
@@ -614,13 +686,18 @@ function calcPos(){
 async function runFullMarketScan(){
   if(!geminiApiKey){alert("AI脳内タブでAPIキーを設定してください。");return;}
   const st=document.getElementById('scan-status');
-  st.innerText="東証全銘柄をAIスキャン中...";
+  st.innerText="東証全銘柄からBNFロジックに合致する銘柄をAIスキャン中...";
   try{
-    const res=await callGemini("東証で25日移動平均線からの乖離率が大きい注目逆張り銘柄を3つ挙げて", true);
-    document.getElementById('full-scan-results').innerHTML=`<div class="agent-card"><p>${res}</p></div>`;
-    st.innerText="スキャン完了";
+    const prompt=`
+今日の東証市場全体をリアルタイム検索し、BNFの逆張りロジック（地合い相関、25日移動平均線マイナス乖離率、業種別基準、パニック売り出来高）に最も合致する買い候補銘柄を3〜5銘柄抽出・スキャンしてください。
+
+各銘柄について指定フォーマット【1. 総合判定 (S/A/B/C)】【2. 分析理由】【3. エントリー・撤退判断】に沿って明確に出力してください。
+`;
+    const res=await callGemini(prompt, true);
+    document.getElementById('full-scan-results').innerHTML=`<div class="agent-card">${res}</div>`;
+    st.innerText="スキャン完了";st.style.color="var(--green)";
   }catch(e){
-    st.innerText="エラー: "+e.message;
+    st.innerText="エラー: "+e.message;st.style.color="var(--red)";
   }
 }
 
@@ -631,12 +708,13 @@ async function sendChat(){
   const box=document.getElementById('chat-box');
   box.innerHTML+=`<div class="bubble user">${txt}</div>`;
   input.value="";
+  box.scrollTop=box.scrollHeight;
   
   try{
-    const ans=await callGemini("あなたはBNF（小手川隆）スタイルの投資アドバイザーです: "+txt);
+    const ans=await callGemini(txt, true);
     box.innerHTML+=`<div class="bubble bnf">${ans}</div>`;
   }catch(e){
-    box.innerHTML+=`<div class="bubble bnf">エラー: ${e.message}</div>`;
+    box.innerHTML+=`<div class="bubble bnf" style="color:var(--red);">エラー: ${e.message}</div>`;
   }
   box.scrollTop=box.scrollHeight;
 }

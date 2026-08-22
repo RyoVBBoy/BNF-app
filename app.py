@@ -1,7 +1,7 @@
 """
 app.py
 ------
-BNF PREMIUM (コードブロック表示エラー完全防止版)
+BNF PREMIUM (固定ボトムナビ完全定着版)
 """
 
 from __future__ import annotations
@@ -37,7 +37,6 @@ def render_progress_bar():
 def render_quote(text):
     return f'<div style="display:flex; gap:10px; padding:12px; border:1px solid #23272C; border-radius:10px; background:#121417; margin-bottom:14px;"><div style="width:36px; height:36px; border-radius:50%; background:rgba(213,0,249,0.15); border:1px solid #d500f9; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:900; color:#d500f9; flex-shrink:0;">BNF</div><div><span style="font-size:0.85rem; font-weight:800;">B.N.F</span><span style="font-size:0.75rem; color:#71767B; margin-left:4px;">@market_shadow</span><div style="font-size:0.85rem; margin-top:2px; font-style:italic;">「{text}」</div></div></div>'
 
-# 🟢 コードブロック化を防ぐため完全に1行に凝縮したHTML生成関数
 def render_bottom_nav(current_tab):
     tabs = [
         ("地合い", "fa-globe"),
@@ -70,7 +69,7 @@ with st.sidebar:
     ntfy_topic = st.text_input("ntfy.sh トピック名")
 
 # ══════════════════════════════════════════════════
-# 地合い画面 (画像2完全再現)
+# 各画面切り替え
 # ══════════════════════════════════════════════════
 if selected_tab == "地合い":
     snap = st.session_state.market_snapshot
@@ -104,9 +103,6 @@ if selected_tab == "地合い":
         unsafe_allow_html=True,
     )
 
-# ══════════════════════════════════════════════════
-# ツール画面
-# ══════════════════════════════════════════════════
 elif selected_tab == "ツール":
     st.markdown("<h3 style='margin:0 0 10px 0;'>逆張り分析ツール</h3>", unsafe_allow_html=True)
     sub_calc, sub_watch, sub_pos = st.tabs(["単発計算", "個別監視リスト", "ナンピン計算"])
@@ -138,9 +134,6 @@ elif selected_tab == "ツール":
         st.slider("損切り幅 (エントリー価格から)", 1.0, 15.0, 3.0, 0.5)
         st.slider("利確ターゲット② (カスタム幅)", 1.0, 30.0, 5.0, 0.5)
 
-# ══════════════════════════════════════════════════
-# 全株スキャン画面
-# ══════════════════════════════════════════════════
 elif selected_tab == "全株スキャン":
     st.markdown("<h3 style='margin:0;'>全株スキャン (東証全銘柄対象)</h3>", unsafe_allow_html=True)
     st.caption("最終スキャン: 未実行")
@@ -160,9 +153,6 @@ elif selected_tab == "全株スキャン":
     if st.button("📡 東証全銘柄をAIスキャン (~30秒)", use_container_width=True):
         st.info("スキャン処理中...")
 
-# ══════════════════════════════════════════════════
-# AI脳内画面
-# ══════════════════════════════════════════════════
 elif selected_tab == "AI脳内":
     col_k, col_b = st.columns([3, 1])
     col_k.text_input("Gemini APIキーを入力", type="password", label_visibility="collapsed", placeholder="Gemini APIキーを入力")
@@ -175,9 +165,6 @@ elif selected_tab == "AI脳内":
     q2.button("❓ 今買していい？")
     q3.button("✂ 損切り判断")
 
-# ══════════════════════════════════════════════════
-# ログ画面
-# ══════════════════════════════════════════════════
 elif selected_tab == "ログ":
     st.markdown("<h3 style='margin:0 0 10px 0;'>売買ログ</h3>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
@@ -188,5 +175,5 @@ elif selected_tab == "ログ":
     st.button("📄 CSVエクスポート")
     st.markdown("<div style='text-align:center; padding:40px 0; color:#71767B; font-size:0.9rem;'>ログはありません</div>", unsafe_allow_html=True)
 
-# ── 最下部にボトムナビを挿入 ──
+# ── 最下部に固定ボトムナビを表示 ──
 st.markdown(render_bottom_nav(selected_tab), unsafe_allow_html=True)

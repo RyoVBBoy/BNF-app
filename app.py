@@ -1,7 +1,7 @@
 """
 app.py
 ------
-BNF PREMIUM (完全画像再現・絵文字100%排除版)
+BNF PREMIUM (HTMLタグ直接書き込み修正版)
 """
 
 from __future__ import annotations
@@ -16,7 +16,6 @@ from bnf_core import (
 st.set_page_config(page_title="BNF PREMIUM", layout="centered")
 st.markdown(styles.CSS, unsafe_allow_html=True)
 
-# ── UI描画関数 ──
 def render_market_bar(nikkei, down_ratio, usdjpy):
     n_str = f"{nikkei:,.0f}" if nikkei else "--"
     u_str = f"{usdjpy:.2f}" if usdjpy else "--"
@@ -63,12 +62,11 @@ def render_quote(text):
     </div>
     """
 
-# ── セッション初期化 ──
 for key, default in [("market_snapshot", None), ("market_comment", None), ("chat_history", []), ("scan_results", [])]:
     if key not in st.session_state:
         st.session_state[key] = default
 
-# ── ヘッダー ──
+# ヘッダー
 st.markdown(
     """
     <div class="bnf-header">
@@ -85,7 +83,7 @@ with st.sidebar:
     discord_webhook = st.text_input("Discord Webhook URL", type="password")
     ntfy_topic = st.text_input("ntfy.sh トピック名")
 
-# ── 画像完全準拠 ボトムナビゲーション ──
+# ボトムナビゲーション
 selected_tab = st.radio(
     label="Nav",
     options=["地合い", "ツール", "全株スキャン", "AI脳内", "ログ"],
@@ -94,9 +92,7 @@ selected_tab = st.radio(
     key="bottom_nav",
 )
 
-# ══════════════════════════════════════════════════
-# 地合い画面 (画像5再現)
-# ══════════════════════════════════════════════════
+# 地合い画面
 if selected_tab == "地合い":
     snap = st.session_state.market_snapshot
     st.markdown(
@@ -114,7 +110,7 @@ if selected_tab == "地合い":
 
     st.markdown(render_score_hero(snap.down_ratio_score if snap else None, label), unsafe_allow_html=True)
 
-    # 水色丸ボタン
+    # ボタン配色の適用
     st.markdown("""
     <style>
     div.row-widget.stButton > button {
@@ -125,7 +121,8 @@ if selected_tab == "地合い":
     </style>
     """, unsafe_allow_html=True)
 
-    if st.button("<i class='fa-solid fa-bolt'></i> AIで今日の地合いをリアルタイム同期", use_container_width=True):
+    # st.button にHTMLタグを埋め込まず、プレーンテキストに修正
+    if st.button("⚡ AIで今日の地合いをリアルタイム同期", use_container_width=True):
         with st.spinner("同期中..."):
             st.session_state.market_snapshot = data.fetch_market_snapshot()
             st.session_state.market_comment = None
@@ -134,9 +131,7 @@ if selected_tab == "地合い":
     comment = st.session_state.market_comment or "AIで同期すると状況コメントが出ます"
     st.markdown(render_quote(comment), unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════
-# ツール画面 (画像2再現)
-# ══════════════════════════════════════════════════
+# ツール画面
 elif selected_tab == "ツール":
     st.markdown("<h3 style='margin:0 0 10px 0;'>逆張り分析ツール</h3>", unsafe_allow_html=True)
     sub_calc, sub_watch, sub_pos = st.tabs(["単発計算", "個別監視リスト", "ナンピン計算"])
@@ -146,7 +141,6 @@ elif selected_tab == "ツール":
         code = col1.text_input("銘柄コード", placeholder="例: 6920")
         sector = col2.text_input("自動判定セクター", value="コード入力で自動判定", disabled=True)
 
-        # エメラルドグリーン丸ボタン
         st.markdown("""
         <style>
         div.row-widget.stButton > button {
@@ -157,7 +151,7 @@ elif selected_tab == "ツール":
         </style>
         """, unsafe_allow_html=True)
 
-        if st.button("<i class='fa-solid fa-rotate'></i> AIでこの銘柄を即時同期", use_container_width=True):
+        if st.button("🔄 AIでこの銘柄を即時同期", use_container_width=True):
             if code:
                 with st.spinner("取得中..."):
                     fetched = data.fetch_stock_snapshot(code)
@@ -175,7 +169,7 @@ elif selected_tab == "ツール":
         st.write("**判定:** 未入力")
         st.write("**しきい値 (地合い調整):** --")
 
-        st.markdown("<p style='color:#d500f9; font-weight:800; margin-top:15px;'><i class='fa-regular fa-circle-dot'></i> 利確 & 損切りターゲット</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#d500f9; font-weight:800; margin-top:15px;'>🎯 利確 & 損切りターゲット</p>", unsafe_allow_html=True)
         st.slider("損切り幅 (エントリー価格から)", 1.0, 15.0, 3.0, 0.5)
         st.slider("利確ターゲット② (カスタム幅)", 1.0, 30.0, 5.0, 0.5)
 
@@ -185,9 +179,7 @@ elif selected_tab == "ツール":
     with sub_pos:
         st.caption("ナンピン計算")
 
-# ══════════════════════════════════════════════════
-# 全株スキャン画面 (画像4再現)
-# ══════════════════════════════════════════════════
+# 全株スキャン画面
 elif selected_tab == "全株スキャン":
     st.markdown("<h3 style='margin:0;'>全株スキャン (東証全銘柄対象)</h3>", unsafe_allow_html=True)
     st.caption("最終スキャン: 未実行")
@@ -196,7 +188,7 @@ elif selected_tab == "全株スキャン":
         """
         <div style="background:#121417; border:1px dashed #d500f9; border-radius:10px; padding:12px; margin:10px 0 15px 0;">
           <div style="color:#d500f9; font-weight:800; font-size:0.85rem; margin-bottom:4px;">
-            <i class="fa-solid fa-circle" style="font-size:0.5rem; vertical-align:middle;"></i> Gemini AIが東証全銘柄をリアルタイム監視
+            ● Gemini AIが東証全銘柄をリアルタイム監視
           </div>
           <div style="font-size:0.78rem; color:#71767B; line-height:1.4;">
             Gemini AIのWeb検索機能を使い、東証プライム・スタンダード・グロース市場の約3,800銘柄すべての中からBNFロジックに合致する銘柄をリアルタイム抽出します。
@@ -213,7 +205,6 @@ elif selected_tab == "全株スキャン":
     sc3.selectbox("乖離率フィルター", ["全ゾーン"])
     sc4.selectbox("並び替え", ["乖離率が大きい順"])
 
-    # 紫色丸ボタン
     st.markdown("""
     <style>
     div.row-widget.stButton > button {
@@ -224,14 +215,12 @@ elif selected_tab == "全株スキャン":
     </style>
     """, unsafe_allow_html=True)
 
-    if st.button("<i class='fa-solid fa-satellite-dish'></i> 東証全銘柄をAIスキャン (~30秒)", use_container_width=True):
+    if st.button("📡 東証全銘柄をAIスキャン (~30秒)", use_container_width=True):
         st.info("スキャン処理中...")
 
-    st.markdown("<div style='text-align:center; margin-top:10px;'><span style='background:#121417; border:1px solid #23272C; padding:6px 16px; border-radius:9999px; font-size:0.8rem;'><i class='fa-solid fa-bell'></i> 通知許可済み <i class='fa-solid fa-square-check' style='color:#00BA7C;'></i></span></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center; margin-top:10px;'><span style='background:#121417; border:1px solid #23272C; padding:6px 16px; border-radius:9999px; font-size:0.8rem;'>🔔 通知許可済み ✅</span></div>", unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════
-# AI脳内画面 (画像1再現)
-# ══════════════════════════════════════════════════
+# AI脳内画面
 elif selected_tab == "AI脳内":
     col_k, col_b = st.columns([3, 1])
     col_k.text_input("Gemini APIキーを入力", type="password", label_visibility="collapsed", placeholder="Gemini APIキーを入力")
@@ -247,9 +236,8 @@ elif selected_tab == "AI脳内":
     """, unsafe_allow_html=True)
     col_b.button("接続する", use_container_width=True)
 
-    st.markdown("<div style='font-size:0.8rem; color:#00BA7C; margin-bottom:12px;'><i class='fa-solid fa-square-check'></i> 接続済み</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:0.8rem; color:#00BA7C; margin-bottom:12px;'>✅ 接続済み</div>", unsafe_allow_html=True)
 
-    # クイック質問ボタン
     st.markdown("""
     <style>
     div.row-widget.stButton > button {
@@ -260,9 +248,9 @@ elif selected_tab == "AI脳内":
     </style>
     """, unsafe_allow_html=True)
     q1, q2, q3 = st.columns(3)
-    q1.button("<i class='fa-solid fa-newspaper'></i> 今日の相場")
-    q2.button("<i class='fa-solid fa-circle-question'></i> 今買していい？")
-    q3.button("<i class='fa-solid fa-scissors'></i> 損切り判断")
+    q1.button("📰 今日の相場")
+    q2.button("❓ 今買していい？")
+    q3.button("✂ 損切り判断")
 
     st.markdown(
         """
@@ -273,9 +261,7 @@ elif selected_tab == "AI脳内":
         unsafe_allow_html=True,
     )
 
-# ══════════════════════════════════════════════════
-# ログ画面 (画像3再現)
-# ══════════════════════════════════════════════════
+# ログ画面
 elif selected_tab == "ログ":
     st.markdown("<h3 style='margin:0 0 10px 0;'>売買ログ</h3>", unsafe_allow_html=True)
     
@@ -293,7 +279,7 @@ elif selected_tab == "ログ":
     }
     </style>
     """, unsafe_allow_html=True)
-    st.button("<i class='fa-solid fa-file-csv'></i> CSVエクスポート")
+    st.button("📄 CSVエクスポート")
 
     st.markdown("<div style='text-align:center; padding:40px 0; color:#71767B; font-size:0.9rem;'>ログはありません</div>", unsafe_allow_html=True)
 

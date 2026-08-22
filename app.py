@@ -1,7 +1,7 @@
 """
 app.py
 ------
-BNF PREMIUM (完全画像再現・エラー防止構造)
+BNF PREMIUM (完全画像再現・絵文字100%排除版)
 """
 
 from __future__ import annotations
@@ -13,10 +13,10 @@ from bnf_core import (
     gemini_client, notifications, styles, browser_notify,
 )
 
-st.set_page_config(page_title="BNF PREMIUM", page_icon="📈", layout="centered")
+st.set_page_config(page_title="BNF PREMIUM", layout="centered")
 st.markdown(styles.CSS, unsafe_allow_html=True)
 
-# ── UI描画用ローカル関数 (AttributeError防止) ──
+# ── UI描画関数 ──
 def render_market_bar(nikkei, down_ratio, usdjpy):
     n_str = f"{nikkei:,.0f}" if nikkei else "--"
     u_str = f"{usdjpy:.2f}" if usdjpy else "--"
@@ -85,7 +85,7 @@ with st.sidebar:
     discord_webhook = st.text_input("Discord Webhook URL", type="password")
     ntfy_topic = st.text_input("ntfy.sh トピック名")
 
-# ── ボトムナビゲーション ──
+# ── 画像完全準拠 ボトムナビゲーション ──
 selected_tab = st.radio(
     label="Nav",
     options=["地合い", "ツール", "全株スキャン", "AI脳内", "ログ"],
@@ -114,10 +114,10 @@ if selected_tab == "地合い":
 
     st.markdown(render_score_hero(snap.down_ratio_score if snap else None, label), unsafe_allow_html=True)
 
-    # 画像5通りの青色丸ボタン
+    # 水色丸ボタン
     st.markdown("""
     <style>
-    div.row-widget.stButton > button[kind="secondary"] {
+    div.row-widget.stButton > button {
         background-color: #1D9BF0 !important;
         color: white !important;
         border: none !important;
@@ -146,7 +146,7 @@ elif selected_tab == "ツール":
         code = col1.text_input("銘柄コード", placeholder="例: 6920")
         sector = col2.text_input("自動判定セクター", value="コード入力で自動判定", disabled=True)
 
-        # 画像2通りの緑色丸ボタン
+        # エメラルドグリーン丸ボタン
         st.markdown("""
         <style>
         div.row-widget.stButton > button {
@@ -213,6 +213,7 @@ elif selected_tab == "全株スキャン":
     sc3.selectbox("乖離率フィルター", ["全ゾーン"])
     sc4.selectbox("並び替え", ["乖離率が大きい順"])
 
+    # 紫色丸ボタン
     st.markdown("""
     <style>
     div.row-widget.stButton > button {
@@ -249,6 +250,15 @@ elif selected_tab == "AI脳内":
     st.markdown("<div style='font-size:0.8rem; color:#00BA7C; margin-bottom:12px;'><i class='fa-solid fa-square-check'></i> 接続済み</div>", unsafe_allow_html=True)
 
     # クイック質問ボタン
+    st.markdown("""
+    <style>
+    div.row-widget.stButton > button {
+        background-color: #1A1D21 !important;
+        color: var(--text) !important;
+        border: 1px solid #23272C !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     q1, q2, q3 = st.columns(3)
     q1.button("<i class='fa-solid fa-newspaper'></i> 今日の相場")
     q2.button("<i class='fa-solid fa-circle-question'></i> 今買していい？")
@@ -287,7 +297,6 @@ elif selected_tab == "ログ":
 
     st.markdown("<div style='text-align:center; padding:40px 0; color:#71767B; font-size:0.9rem;'>ログはありません</div>", unsafe_allow_html=True)
 
-    # 赤枠リセットボタン
     st.markdown("""
     <style>
     div.row-widget.stButton > button[kind="secondary"] {

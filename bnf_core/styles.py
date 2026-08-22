@@ -1,7 +1,7 @@
 """
 styles.py
 ---------
-BNF PREMIUM — ネオンUI & FontAwesomeスタイル定義
+BNF PREMIUM — 完全ノンスマイリー & Twitter(X)風ボトムナビCSS定義
 """
 
 CSS = """
@@ -21,6 +21,7 @@ CSS = """
   --red: #F4212E;
 }
 
+/* 全体スタイル */
 .stApp {
   background-color: var(--black) !important;
   color: var(--text) !important;
@@ -65,70 +66,96 @@ section.main > div {
   border-radius: 50%;
 }
 
-/* ボトムナビゲーション (画像準拠) */
+/* ══════════════════════════════════════════════════
+   ボトムナビゲーション (画像完全再現CSS)
+   ══════════════════════════════════════════════════ */
 div[data-testid="stRadio"] {
   position: fixed !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
   z-index: 999999 !important;
-  background: #000000 !important;
+  background-color: #000000 !important;
   border-top: 1px solid var(--bdr) !important;
   padding: 8px 0 12px 0 !important;
   margin: 0 !important;
 }
+
 div[data-testid="stRadio"] > div[role="radiogroup"] {
   display: flex !important;
+  flex-direction: row !important;
   justify-content: space-around !important;
   align-items: center !important;
   max-width: 600px !important;
   margin: 0 auto !important;
   width: 100% !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] > label {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  flex: 1 !important;
+
+/* ラベル自体をタップ可能なボタン化 */
+div[data-testid="stRadio"] label {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
+  justify-content: center !important;
+  flex: 1 !important;
   cursor: pointer !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 2px 0 !important;
+  outline: none !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] > label input {
+
+/* 「まるぽっち（ラジオディスク）」を完全に非表示 */
+div[data-testid="stRadio"] label > div:first-child,
+div[data-testid="stRadio"] label input[type="radio"],
+div[data-testid="stRadio"] div[data-baseweb="radio"] > div:first-child {
   display: none !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] > label::before {
+
+/* アイコン定義（未選択状態：グレー） */
+div[data-testid="stRadio"] label::before {
   font-family: "Font Awesome 6 Free" !important;
   font-weight: 900 !important;
-  font-size: 1.35rem !important;
+  font-size: 1.4rem !important;
   color: #444444 !important;
-  transition: all 0.15s ease !important;
+  display: block !important;
+  margin-bottom: 2px !important;
+  transition: all 0.15s ease-in-out !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(1)::before { content: "\f57d"; }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(2)::before { content: "\f6e3"; }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(3)::before { content: "\f7c0"; }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(4)::before { content: "\f5dc"; }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:nth-child(5)::before { content: "\f201"; }
 
-div[data-testid="stRadio"] div[role="radiogroup"] > label:has(input:checked)::before {
-  color: var(--acc) !important;
-}
-div[data-testid="stRadio"] div[role="radiogroup"] > label p {
+/* 画像と同じ5つのFontAwesomeアイコン割り当て */
+div[data-testid="stRadio"] label:nth-child(1)::before { content: "\f57d"; } /* 地球儀 (地合い) */
+div[data-testid="stRadio"] label:nth-child(2)::before { content: "\f6e3"; } /* 工具 (ツール) */
+div[data-testid="stRadio"] label:nth-child(3)::before { content: "\f7c0"; } /* アンテナ (全株スキャン) */
+div[data-testid="stRadio"] label:nth-child(4)::before { content: "\f5dc"; } /* 脳 (AI脳内) */
+div[data-testid="stRadio"] label:nth-child(5)::before { content: "\f201"; } /* グラフ (ログ) */
+
+/* 未選択時のテキスト非表示 */
+div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
   font-size: 0.65rem !important;
   font-weight: 800 !important;
-  margin-top: 3px !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  display: none !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:has(input:checked) p {
+
+/* 🟢 押している（アクティブな）ボタンの発光スタイル */
+div[data-testid="stRadio"] label:has(input:checked)::before,
+div[data-testid="stRadio"] label[aria-checked="true"]::before {
+  color: var(--acc) !important;
+  transform: scale(1.1) !important;
+  filter: drop-shadow(0px 0px 6px rgba(213, 0, 249, 0.8)) !important;
+}
+
+/* 🟢 押している（アクティブな）ボタンのみテキストを表示＆ネオン発光 */
+div[data-testid="stRadio"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p,
+div[data-testid="stRadio"] label[aria-checked="true"] div[data-testid="stMarkdownContainer"] p {
   color: var(--acc) !important;
   display: block !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:not(:has(input:checked)) p {
-  display: none !important;
-}
 
-/* Streamlit標準コンポーネント */
+/* ボタン類 */
 div.stButton > button {
   border-radius: 9999px !important;
   font-weight: 800 !important;

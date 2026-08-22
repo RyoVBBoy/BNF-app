@@ -1,13 +1,12 @@
 """
 styles.py
 ---------
-BNF PREMIUM — 純粋HTMLナビ & ネオンUIスタイル
+BNF PREMIUM — スタイル定義（リンク・アイコン強制定着版）
 """
 
 CSS = """
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-
 :root {
   --black: #000000;
   --s1: #121417;
@@ -18,7 +17,6 @@ CSS = """
   --acc: #d500f9;
   --blue: #1D9BF0;
   --green: #00BA7C;
-  --red: #F4212E;
 }
 
 .stApp {
@@ -27,8 +25,8 @@ CSS = """
 }
 
 section.main > div {
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 600px !important;
+  margin: 0 auto !important;
   padding: 0.5rem 1rem 120px 1rem !important;
 }
 
@@ -66,83 +64,62 @@ section.main > div {
 }
 
 /* ══════════════════════════════════════════════════
-   完全HTMLボトムナビゲーション (画像2完全再現)
+   固定ボトムナビ（青字・下線の完全打ち消し）
    ══════════════════════════════════════════════════ */
 .bnf-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 999999;
-  background-color: #000000;
-  border-top: 1px solid var(--bdr);
-  padding: 10px 0 16px 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  max-width: 600px;
-  margin: 0 auto;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 999999 !important;
+  background-color: #000000 !important;
+  border-top: 1px solid #23272C !important;
+  padding: 10px 0 16px 0 !important;
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
 }
 
-.bnf-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+a.bnf-nav-item, 
+a.bnf-nav-item:link, 
+a.bnf-nav-item:visited, 
+a.bnf-nav-item:hover, 
+a.bnf-nav-item:active {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
   text-decoration: none !important;
-  color: #444444 !important;
-  flex: 1;
-  transition: all 0.15s ease;
+  color: #71767B !important;
+  flex: 1 !important;
+  border: none !important;
+  outline: none !important;
 }
 
-.bnf-nav-item i {
-  font-size: 1.35rem;
-  margin-bottom: 2px;
-}
-
-.bnf-nav-item span {
-  font-size: 0.65rem;
-  font-weight: 800;
-  display: none;
-}
-
-/* 🟢 アクティブ（選択中）：ネオンパープル発光 & テキスト表示 */
-.bnf-nav-item.active {
-  color: var(--acc) !important;
-}
-
-.bnf-nav-item.active i {
-  filter: drop-shadow(0px 0px 8px rgba(213, 0, 249, 0.9));
-  transform: scale(1.05);
-}
-
-.bnf-nav-item.active span {
+a.bnf-nav-item i {
+  font-size: 1.3rem !important;
+  margin-bottom: 3px !important;
   display: block !important;
-  color: var(--acc) !important;
 }
 
-/* 🟢 画像2準拠 青色丸ボタン */
-.bnf-btn-blue {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  background-color: var(--blue);
-  color: #ffffff !important;
-  font-weight: 800;
-  font-size: 0.95rem;
-  padding: 12px 0;
-  border-radius: 9999px;
-  text-decoration: none !important;
-  border: none;
-  cursor: pointer;
-  margin: 14px 0;
-  box-shadow: 0px 4px 12px rgba(29, 155, 240, 0.3);
+a.bnf-nav-item span {
+  font-size: 0.65rem !important;
+  font-weight: 800 !important;
+  display: block !important;
+  line-height: 1 !important;
 }
 
-.bnf-btn-blue:active {
-  opacity: 0.85;
+/* 選択中のタブ（ネオンパープル） */
+a.bnf-nav-item.active, 
+a.bnf-nav-item.active:link, 
+a.bnf-nav-item.active:visited {
+  color: #d500f9 !important;
+}
+
+a.bnf-nav-item.active i {
+  filter: drop-shadow(0px 0px 8px rgba(213, 0, 249, 0.9)) !important;
 }
 
 /* カードスタイル */

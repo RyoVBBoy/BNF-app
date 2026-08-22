@@ -1,7 +1,7 @@
 """
 app.py
 ------
-BNF CORE AUTOMATION PREMIUM — Python(Streamlit)版
+BNF CORE AUTOMATION PREMIUM — Python(Streamlit)版 (Twitter UI Version)
 
 起動:
     streamlit run app.py
@@ -48,14 +48,27 @@ with st.sidebar:
     ntfy_topic = st.text_input("ntfy.sh トピック名(任意)", placeholder="例: my-bnf-alert-xyz")
     st.caption("スキャン完了時に結果をここへ送信します。")
 
-tab_market, tab_tools, tab_scan, tab_chat, tab_log = st.tabs(
-    ["📊 地合い", "🛠 ツール", "📡 全株スキャン", "🧠 AI脳内", "📒 ログ"]
+# ── Twitter風 ボトムナビゲーション (画面最下部固定) ──────────────────────────
+nav_options = [
+    "🌐\n地合い",
+    "🛠️\nツール",
+    "📡\n全株スキャン",
+    "🧠\nAI脳内",
+    "📒\nログ",
+]
+
+selected_tab = st.radio(
+    label="Navigation",
+    options=nav_options,
+    horizontal=True,
+    label_visibility="collapsed",
+    key="bottom_nav",
 )
 
 # ══════════════════════════════════════════════════
-# 地合いタブ
+# 地合い画面
 # ══════════════════════════════════════════════════
-with tab_market:
+if selected_tab == "🌐\n地合い":
     if st.button("⚡ 市場データを同期(実データ取得)", use_container_width=True):
         with st.spinner("日経平均・ドル円を取得中..."):
             st.session_state.market_snapshot = data.fetch_market_snapshot()
@@ -92,9 +105,9 @@ with tab_market:
         st.caption("上のボタンで実データを取得してください。")
 
 # ══════════════════════════════════════════════════
-# ツールタブ
+# ツール画面
 # ══════════════════════════════════════════════════
-with tab_tools:
+elif selected_tab == "🛠️\nツール":
     sub_calc, sub_watch, sub_pos = st.tabs(["単発計算", "監視リスト", "ナンピン計算"])
 
     with sub_calc:
@@ -112,9 +125,9 @@ with tab_tools:
         fetched = st.session_state.get("last_fetched")
         col_a, col_b = st.columns(2)
         price = col_a.number_input("現在値(円)", min_value=0.0,
-                                    value=float(fetched.price) if fetched else 0.0)
+                                   value=float(fetched.price) if fetched else 0.0)
         ma25 = col_b.number_input("25日移動平均(円)", min_value=0.0,
-                                   value=float(fetched.ma25) if fetched else 0.0)
+                                  value=float(fetched.ma25) if fetched else 0.0)
         atr14 = fetched.atr14 if fetched else 0.0
         market_score = st.session_state.market_snapshot.down_ratio_score if st.session_state.market_snapshot else 50.0
 
@@ -135,7 +148,7 @@ with tab_tools:
             t2.metric("利確②(カスタム)", f"{tg['profit_custom']:.1f}円", f"+{custom_profit_pct:.1f}%")
             t3, t4 = st.columns(2)
             t3.metric("損切りライン(実効)", f"{tg['effective_stop']:.1f}円",
-                       help=f"固定%: {tg['stop_fixed']}円 / ATR基準: {tg['stop_atr']}円")
+                      help=f"固定%: {tg['stop_fixed']}円 / ATR基準: {tg['stop_atr']}円")
             t4.metric("RRR(MA25基準)", f"{tg['rrr']}" if tg["rrr"] else "—")
 
             st.markdown("##### ⚖️ 資金管理(口座リスク%からロット逆算)")
@@ -200,9 +213,9 @@ with tab_tools:
                     st.write(f"残資金で最大 **{max_additional:,}株** 追加可能 → 平均取得単価は **{new_avg:,.1f}円**")
 
 # ══════════════════════════════════════════════════
-# 全株スキャンタブ
+# 全株スキャン画面
 # ══════════════════════════════════════════════════
-with tab_scan:
+elif selected_tab == "📡\n全株スキャン":
     uni_updated = universe.universe_last_updated()
     cache_updated = price_cache.cache_last_updated()
     uni_size = scanner.universe_size() if uni_updated else 0
@@ -274,9 +287,9 @@ with tab_scan:
     browser_notify.request_permission_button()
 
 # ══════════════════════════════════════════════════
-# AI脳内タブ
+# AI脳内画面
 # ══════════════════════════════════════════════════
-with tab_chat:
+elif selected_tab == "🧠\nAI脳内":
     if not api_key:
         st.info("サイドバーにGemini APIキーを入力するとチャットできます。")
     else:
@@ -298,9 +311,9 @@ with tab_chat:
             st.rerun()
 
 # ══════════════════════════════════════════════════
-# ログタブ
+# ログ画面
 # ══════════════════════════════════════════════════
-with tab_log:
+elif selected_tab == "📒\nログ":
     logs = storage.load_logs()
     if logs:
         c1, c2, c3 = st.columns(3)

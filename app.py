@@ -1,7 +1,10 @@
 """
 app.py
 ------
-BNF PREMIUM (固定ボトムナビ完全定着版)
+BNF CORE AUTOMATION PREMIUM — Python(Streamlit)版
+
+起動:
+    streamlit run app.py
 """
 
 from __future__ import annotations
@@ -13,167 +16,310 @@ from bnf_core import (
     gemini_client, notifications, styles, browser_notify,
 )
 
-st.set_page_config(page_title="BNF PREMIUM", layout="centered")
+st.set_page_config(page_title="BNF PREMIUM", page_icon="📉", layout="centered")
 st.markdown(styles.CSS, unsafe_allow_html=True)
 
-# ── URLパラメータから現在のタブを取得 ──
-query_params = st.query_params
-selected_tab = query_params.get("tab", "地合い")
-
-# ── UI描画関数 ──
-def render_market_bar(nikkei, down_ratio, usdjpy):
-    n_str = f"{nikkei:,.0f}" if nikkei else "--"
-    u_str = f"{usdjpy:.2f}" if usdjpy else "--"
-    d_str = f"{down_ratio}" if down_ratio is not None else "--"
-    return f'<div style="display:flex; border:1px solid #23272C; background:#121417; border-radius:10px; overflow:hidden; margin-bottom:14px;"><div style="flex:1; padding:10px; text-align:center; border-right:1px solid #23272C;"><div style="font-size:0.7rem; color:#71767B;">日経平均</div><div style="font-size:1rem; font-weight:800; font-family:monospace; margin-top:2px;">{n_str}</div><div style="font-size:0.65rem; color:#71767B;">--</div></div><div style="flex:1; padding:10px; text-align:center; border-right:1px solid #23272C;"><div style="font-size:0.7rem; color:#71767B;">値下がり銘柄</div><div style="font-size:1rem; font-weight:800; font-family:monospace; margin-top:2px;">{d_str}</div><div style="font-size:0.65rem; color:#71767B;">東証全体</div></div><div style="flex:1; padding:10px; text-align:center;"><div style="font-size:0.7rem; color:#71767B;">ドル円</div><div style="font-size:1rem; font-weight:800; font-family:monospace; margin-top:2px;">{u_str}</div><div style="font-size:0.65rem; color:#71767B;">--</div></div></div>'
-
-def render_score_hero(score, label):
-    s_str = f"{score:.0f}" if score is not None else "--"
-    return f'<div style="display:flex; flex-direction:column; align-items:center; padding:20px; border:1px solid #23272C; border-radius:10px; background:#121417; margin-bottom:14px;"><div><span style="font-size:3.2rem; font-weight:900; font-family:monospace;">{s_str}</span><span style="font-size:1.2rem; font-weight:700; color:#71767B;">/100</span></div><div style="font-size:0.85rem; font-weight:700; margin-top:6px;">{label}</div></div>'
-
-def render_progress_bar():
-    return '<div class="bnf-card"><div style="font-size:0.75rem; color:#71767B; font-weight:700; margin-bottom:8px;">BNF臨界点まで（東証値下がり銘柄 / 1,400銘柄）</div><div style="width:100%; height:8px; background:#23272C; border-radius:9999px; overflow:hidden;"><div style="width:0%; height:100%; background:#00BA7C;"></div></div><div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-top:6px;"><span style="color:#71767B;">-- 銘柄が値下がり中</span><span style="color:#00BA7C; font-weight:700; margin-left:auto;">あと -- 銘柄</span></div></div>'
-
-def render_quote(text):
-    return f'<div style="display:flex; gap:10px; padding:12px; border:1px solid #23272C; border-radius:10px; background:#121417; margin-bottom:14px;"><div style="width:36px; height:36px; border-radius:50%; background:rgba(213,0,249,0.15); border:1px solid #d500f9; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:900; color:#d500f9; flex-shrink:0;">BNF</div><div><span style="font-size:0.85rem; font-weight:800;">B.N.F</span><span style="font-size:0.75rem; color:#71767B; margin-left:4px;">@market_shadow</span><div style="font-size:0.85rem; margin-top:2px; font-style:italic;">「{text}」</div></div></div>'
-
-def render_bottom_nav(current_tab):
-    tabs = [
-        ("地合い", "fa-globe"),
-        ("ツール", "fa-wrench"),
-        ("全株スキャン", "fa-satellite-dish"),
-        ("AI脳内", "fa-brain"),
-        ("ログ", "fa-chart-line"),
-    ]
-    items = []
-    for name, icon in tabs:
-        active_cls = " active" if current_tab == name else ""
-        items.append(f'<a href="?tab={name}" target="_self" class="bnf-nav-item{active_cls}"><i class="fa-solid {icon}"></i><span>{name}</span></a>')
-    return f'<div class="bnf-bottom-nav">{"".join(items)}</div>'
-
-# ── セッション初期化 ──
-for key, default in [("market_snapshot", None), ("market_comment", None), ("chat_history", []), ("scan_results", [])]:
+# ── セッション状態初期化 ──────────────────────────
+for key, default in [
+    ("market_snapshot", None), ("market_comment", None),
+    ("chat_history", []), ("scan_results", []),
+]:
     if key not in st.session_state:
         st.session_state[key] = default
 
-# ── ヘッダー ──
+# ── ヘッダー ──────────────────────────────
 st.markdown(
-    '<div class="bnf-header"><div class="bnf-title">BNF PREMIUM</div><div class="bnf-live-badge"><div class="bnf-live-dot"></div>AI LIVE</div></div>',
+    """
+    <div class="bnf-header">
+      <div class="bnf-title">BNF PREMIUM</div>
+      <div class="bnf-live-badge"><div class="bnf-live-dot"></div>AI LIVE</div>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
 with st.sidebar:
     st.markdown("#### 設定")
-    api_key = st.text_input("Gemini APIキー", type="password")
-    discord_webhook = st.text_input("Discord Webhook URL", type="password")
-    ntfy_topic = st.text_input("ntfy.sh トピック名")
+    api_key = st.text_input("Gemini APIキー(任意・コメント生成用)", type="password")
+    st.caption("数値計算はAPIキーなしでも全て動作します。")
+    st.markdown("---")
+    st.markdown("#### 通知(アプリを閉じていてもOK)")
+    discord_webhook = st.text_input("Discord Webhook URL(任意)", type="password")
+    ntfy_topic = st.text_input("ntfy.sh トピック名(任意)", placeholder="例: my-bnf-alert-xyz")
+    st.caption("スキャン完了時に結果をここへ送信します。")
+
+tab_market, tab_tools, tab_scan, tab_chat, tab_log = st.tabs(
+    ["📊 地合い", "🛠 ツール", "📡 全株スキャン", "🧠 AI脳内", "📒 ログ"]
+)
 
 # ══════════════════════════════════════════════════
-# 各画面切り替え
+# 地合いタブ
 # ══════════════════════════════════════════════════
-if selected_tab == "地合い":
-    snap = st.session_state.market_snapshot
-    st.markdown(
-        render_market_bar(
-            snap.nikkei if snap else None,
-            snap.down_ratio_score if snap else None,
-            snap.usdjpy if snap else None,
-        ),
-        unsafe_allow_html=True,
-    )
-
-    label = "AIで同期してください"
-    if snap:
-        label = "パニック水準に近い → 逆張り好機" if snap.down_ratio_score <= 25 else "中立圏"
-
-    st.markdown(render_score_hero(snap.down_ratio_score if snap else None, label), unsafe_allow_html=True)
-    st.markdown(render_progress_bar(), unsafe_allow_html=True)
-
-    comment = st.session_state.market_comment or "AIで同期すると状況コメントが出ます"
-    st.markdown(render_quote(comment), unsafe_allow_html=True)
-
-    if st.button("⚡ AIで今日の地合いをリアルタイム同期", use_container_width=True, type="primary"):
-        with st.spinner("同期中..."):
+with tab_market:
+    if st.button("⚡ 市場データを同期(実データ取得)", use_container_width=True):
+        with st.spinner("日経平均・ドル円を取得中..."):
             st.session_state.market_snapshot = data.fetch_market_snapshot()
             st.session_state.market_comment = None
-            st.rerun()
 
-    st.markdown(
-        '<div class="bnf-card-purple-dash"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><div style="color:#d500f9; font-weight:800; font-size:0.85rem;"><i class="fa-solid fa-brain"></i> AI相場観レポート</div><div style="font-size:0.7rem; color:#71767B;">未更新</div></div><div style="font-size:0.8rem; color:#EFF3F4; line-height:1.4;">「AI脳内」タブでAPIキーを設定すると、地合い同期時にリアルタイムのAI相場観レポートが生成されます。</div></div><div class="bnf-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><div style="color:#1D9BF0; font-weight:800; font-size:0.85rem;"><i class="fa-solid fa-bell"></i> 最新全株スキャン結果</div><div style="font-size:0.7rem; color:#71767B;">--:--:--</div></div><div style="font-size:0.8rem; color:#EFF3F4; line-height:1.4;">「AI通知」タブから全株スキャンを実行すると、ここに最新シグナルが表示されます。</div></div>',
-        unsafe_allow_html=True,
-    )
+    snap = st.session_state.market_snapshot
+    if snap:
+        st.markdown(
+            styles.market_bar_html(snap.nikkei, snap.nikkei_chg_pct, snap.down_ratio_score,
+                                    snap.usdjpy, snap.usdjpy_chg_pct),
+            unsafe_allow_html=True,
+        )
+        if snap.down_ratio_score <= 25:
+            label = "パニック水準に近い → 逆張り好機ゾーン"
+        elif snap.down_ratio_score >= 75:
+            label = "過熱水準 → 新規逆張りは慎重に"
+        else:
+            label = "中立圏"
+        st.markdown(styles.score_hero_html(snap.down_ratio_score, label), unsafe_allow_html=True)
 
-elif selected_tab == "ツール":
-    st.markdown("<h3 style='margin:0 0 10px 0;'>逆張り分析ツール</h3>", unsafe_allow_html=True)
-    sub_calc, sub_watch, sub_pos = st.tabs(["単発計算", "個別監視リスト", "ナンピン計算"])
+        if api_key:
+            if st.button("🧠 AIコメントを生成"):
+                with st.spinner("生成中..."):
+                    st.session_state.market_comment = gemini_client.market_comment(
+                        api_key, snap.nikkei, snap.nikkei_chg_pct, snap.usdjpy, snap.down_ratio_score,
+                    )
+            if st.session_state.market_comment:
+                st.markdown(styles.quote_html(st.session_state.market_comment), unsafe_allow_html=True)
+            else:
+                st.markdown(styles.quote_html("AIで同期すると状況コメントが出ます"), unsafe_allow_html=True)
+        else:
+            st.markdown(styles.quote_html("APIキーを設定すると状況コメントが出ます"), unsafe_allow_html=True)
+    else:
+        st.caption("上のボタンで実データを取得してください。")
+
+# ══════════════════════════════════════════════════
+# ツールタブ
+# ══════════════════════════════════════════════════
+with tab_tools:
+    sub_calc, sub_watch, sub_pos = st.tabs(["単発計算", "監視リスト", "ナンピン計算"])
 
     with sub_calc:
-        col1, col2 = st.columns(2)
-        code = col1.text_input("銘柄コード", placeholder="例: 6920")
-        sector = col2.text_input("自動判定セクター", value="コード入力で自動判定", disabled=True)
+        code = st.text_input("銘柄コード(例: 6920)")
+        sector = st.selectbox("セクター", list(risk.SECTOR_THRESHOLDS.keys()))
 
-        if st.button("🔄 AIでこの銘柄を即時同期", use_container_width=True):
-            if code:
-                with st.spinner("取得中..."):
-                    fetched = data.fetch_stock_snapshot(code)
-                    if fetched:
-                        st.session_state["last_fetched"] = fetched
+        if code and st.button("この銘柄を実データ同期"):
+            with st.spinner("取得中..."):
+                fetched = data.fetch_stock_snapshot(code)
+                if fetched is None:
+                    st.error("データを取得できませんでした。コードを確認してください。")
+                else:
+                    st.session_state["last_fetched"] = fetched
 
         fetched = st.session_state.get("last_fetched")
         col_a, col_b = st.columns(2)
-        price = col_a.number_input("現在値 (円)", min_value=0.0, value=float(fetched.price) if fetched else 0.0)
-        ma25 = col_b.number_input("25日移動平均線", min_value=0.0, value=float(fetched.ma25) if fetched else 0.0)
+        price = col_a.number_input("現在値(円)", min_value=0.0,
+                                    value=float(fetched.price) if fetched else 0.0)
+        ma25 = col_b.number_input("25日移動平均(円)", min_value=0.0,
+                                   value=float(fetched.ma25) if fetched else 0.0)
+        atr14 = fetched.atr14 if fetched else 0.0
+        market_score = st.session_state.market_snapshot.down_ratio_score if st.session_state.market_snapshot else 50.0
 
-        st.markdown("<hr style='border-color:#23272C; margin:15px 0;'>", unsafe_allow_html=True)
-        st.write("**必要資金:** -- 円")
-        st.write("**25日線 乖離率:** -- %")
-        st.write("**判定:** 未入力")
-        st.write("**しきい値 (地合い調整):** --")
+        if price and ma25:
+            deviation_pct = (price - ma25) / ma25 * 100
+            judgement = risk.judge_zone(deviation_pct, sector, market_score)
+            st.metric("25日線 乖離率", f"{deviation_pct:.2f}%")
+            st.write(f"**判定:** {judgement.label}")
 
-        st.markdown("<p style='color:#d500f9; font-weight:800; margin-top:15px;'><i class='fa-regular fa-circle-dot'></i> 利確 & 損切りターゲット</p>", unsafe_allow_html=True)
-        st.slider("損切り幅 (エントリー価格から)", 1.0, 15.0, 3.0, 0.5)
-        st.slider("利確ターゲット② (カスタム幅)", 1.0, 30.0, 5.0, 0.5)
+            st.markdown("##### 🎯 利確・損切りターゲット")
+            stop_pct = st.slider("損切り幅(%)", 1.0, 15.0, 3.0, 0.5)
+            custom_profit_pct = st.slider("利確ターゲット②(カスタム%)", 1.0, 30.0, 5.0, 0.5)
+            atr_multiple = st.slider("ATR倍率(損切りに使用)", 0.5, 3.0, 1.5, 0.1)
 
-elif selected_tab == "全株スキャン":
-    st.markdown("<h3 style='margin:0;'>全株スキャン (東証全銘柄対象)</h3>", unsafe_allow_html=True)
-    st.caption("最終スキャン: 未実行")
+            tg = risk.targets(price, ma25, stop_pct, custom_profit_pct, atr14, atr_multiple)
+            t1, t2 = st.columns(2)
+            t1.metric("利確①(MA25回帰)", f"{tg['profit_ma']:.1f}円", f"{tg['profit_ma_pct']:+.2f}%")
+            t2.metric("利確②(カスタム)", f"{tg['profit_custom']:.1f}円", f"+{custom_profit_pct:.1f}%")
+            t3, t4 = st.columns(2)
+            t3.metric("損切りライン(実効)", f"{tg['effective_stop']:.1f}円",
+                       help=f"固定%: {tg['stop_fixed']}円 / ATR基準: {tg['stop_atr']}円")
+            t4.metric("RRR(MA25基準)", f"{tg['rrr']}" if tg["rrr"] else "—")
 
-    st.markdown(
-        '<div class="bnf-card-purple-dash"><div style="color:#d500f9; font-weight:800; font-size:0.85rem; margin-bottom:4px;"><i class="fa-solid fa-circle" style="font-size:0.5rem; vertical-align:middle;"></i> Gemini AIが東証全銘柄をリアルタイム監視</div><div style="font-size:0.78rem; color:#71767B; line-height:1.4;">Gemini AIのWeb検索機能を使い、東証プライム・スタンダード・グロース市場の約3,800銘柄すべての中からBNFロジックに合致する銘柄をリアルタイム抽出します。</div></div>',
-        unsafe_allow_html=True,
+            st.markdown("##### ⚖️ 資金管理(口座リスク%からロット逆算)")
+            balance = st.number_input("口座残高(円)", min_value=0, value=1_000_000, step=10000)
+            risk_pct = st.slider("1トレードで許容するリスク(口座比 %)", 0.5, 5.0, 1.0, 0.1)
+            pos = risk.position_size(balance, price, tg["effective_stop"], risk_pct)
+            p1, p2 = st.columns(2)
+            p1.metric("推奨購入株数", f"{pos['shares']:,}株")
+            p2.metric("必要資金", f"{pos['capital_required']:,}円")
+            st.caption(f"損切りライン到達時の想定損失: 約{pos['risk_amount']:,}円(口座の{risk_pct}%)")
+
+            if api_key and fetched and st.button("🧠 AI分析コメントを生成"):
+                with st.spinner("生成中..."):
+                    st.info(gemini_client.stock_report(api_key, code, price, ma25, deviation_pct, judgement.label))
+
+            if st.button("💾 ログに保存"):
+                storage.add_log({
+                    "code": code, "sector": sector, "price": price, "ma25": ma25,
+                    "deviation_pct": round(deviation_pct, 2), "zone": judgement.zone,
+                    "stop": tg["effective_stop"], "profit_ma": tg["profit_ma"],
+                    "rrr": tg["rrr"], "shares": pos["shares"],
+                })
+                st.success("保存しました。「ログ」タブで確認できます。")
+
+    with sub_watch:
+        st.caption("お気に入り銘柄のクイック確認リスト(東証全銘柄スキャンは「全株スキャン」タブへ)")
+        wc1, wc2, wc3 = st.columns([1, 1.4, 0.6])
+        new_code = wc1.text_input("コード", key="wl_code")
+        new_name = wc2.text_input("銘柄名(任意)", key="wl_name")
+        if wc3.button("追加"):
+            if new_code:
+                storage.add_to_watchlist(new_code, new_name)
+                st.rerun()
+
+        wl = storage.load_watchlist()
+        if not wl:
+            st.caption("まだ登録がありません。")
+        for item in wl:
+            snap2 = data.fetch_stock_snapshot(item["code"])
+            row = st.columns([1, 2, 1, 0.6])
+            row[0].write(f"**{item['code']}**")
+            row[1].write(item.get("name", ""))
+            row[2].write(f"{snap2.deviation_pct:+.1f}%" if snap2 else "取得失敗")
+            if row[3].button("削除", key=f"del_{item['code']}"):
+                storage.remove_from_watchlist(item["code"])
+                st.rerun()
+
+    with sub_pos:
+        st.markdown("##### 含み損益・ナンピンシミュレータ")
+        buy = st.number_input("購入単価(円)", min_value=0.0, value=0.0)
+        qty = st.number_input("保有株数", min_value=0, value=0, step=100)
+        now = st.number_input("現在の株価(円)", min_value=0.0, value=0.0)
+        cash = st.number_input("口座残高(円)", min_value=0, value=0, step=10000)
+        if buy and qty and now:
+            pl = (now - buy) * qty
+            pl_pct = (now - buy) / buy * 100
+            st.metric("含み損益", f"{pl:,.0f}円", f"{pl_pct:+.2f}%")
+            if cash and now > 0:
+                max_additional = int(cash // now // 100 * 100)
+                if max_additional > 0:
+                    new_avg = (buy * qty + now * max_additional) / (qty + max_additional)
+                    st.write(f"残資金で最大 **{max_additional:,}株** 追加可能 → 平均取得単価は **{new_avg:,.1f}円**")
+
+# ══════════════════════════════════════════════════
+# 全株スキャンタブ
+# ══════════════════════════════════════════════════
+with tab_scan:
+    uni_updated = universe.universe_last_updated()
+    cache_updated = price_cache.cache_last_updated()
+    uni_size = scanner.universe_size() if uni_updated else 0
+
+    st.caption(
+        f"銘柄マスタ: {uni_size:,}銘柄"
+        + (f"(更新: {uni_updated:%Y-%m-%d})" if uni_updated else "(未取得)")
+        + " / 価格キャッシュ: "
+        + (f"{cache_updated:%Y-%m-%d %H:%M}時点" if cache_updated else "未取得")
     )
 
+    step1, step2 = st.columns(2)
+    if step1.button("① 銘柄マスタ更新(JPX・月1回で十分)", use_container_width=True):
+        with st.spinner("JPXから東証上場銘柄一覧を取得中..."):
+            df = universe.refresh_universe()
+        st.success(f"{len(df):,}銘柄を取得しました。")
+        st.rerun()
+
+    if step2.button("② 価格キャッシュ更新(全銘柄・数分かかります)", use_container_width=True):
+        uni = universe.load_universe()
+        codes = uni["code"].tolist()
+        progress = st.progress(0.0, text="準備中...")
+
+        def _cb(done, total):
+            progress.progress(done / total, text=f"取得中... {done}/{total}チャンク")
+
+        with st.spinner(f"{len(codes):,}銘柄を取得中(バッチ処理・数分かかります)..."):
+            price_cache.update_cache(codes, progress_cb=_cb)
+        progress.empty()
+        st.success("価格キャッシュを更新しました。")
+        st.rerun()
+
+    st.markdown("---")
     sc1, sc2 = st.columns(2)
-    sc1.selectbox("候補件数", ["10件 (標準)", "20件", "50件"])
-    sc2.selectbox("対象セクター", ["全セクター", "大型・主役", "ハイテク"])
+    limit = sc1.selectbox("候補件数", [5, 10, 20, 50], index=1)
+    sector_filter = sc2.selectbox("対象セクター", ["all", "heavy", "tech", "growth", "defensive"])
     sc3, sc4 = st.columns(2)
-    sc3.selectbox("乖離率フィルター", ["全ゾーン"])
-    sc4.selectbox("並び替え", ["乖離率が大きい順"])
+    zone_filter = sc3.selectbox("ゾーンフィルター", ["all", "buy", "watch"])
+    sort_by = sc4.selectbox("並び替え", ["kairi", "risk"])
 
-    if st.button("📡 東証全銘柄をAIスキャン (~30秒)", use_container_width=True):
-        st.info("スキャン処理中...")
+    market_score = st.session_state.market_snapshot.down_ratio_score if st.session_state.market_snapshot else 50.0
 
-elif selected_tab == "AI脳内":
-    col_k, col_b = st.columns([3, 1])
-    col_k.text_input("Gemini APIキーを入力", type="password", label_visibility="collapsed", placeholder="Gemini APIキーを入力")
-    col_b.button("接続する", use_container_width=True)
+    if st.button("📡 スキャン実行(キャッシュから瞬時)", use_container_width=True, type="primary"):
+        if not cache_updated:
+            st.warning("先に①②のキャッシュ更新を実行してください。")
+        else:
+            st.session_state.scan_results = scanner.run_scan(
+                market_score, zone_filter, sector_filter, sort_by, limit
+            )
+            hits = st.session_state.scan_results
+            summary = notifications.format_scan_summary(hits)
+            if discord_webhook:
+                notifications.send_discord(discord_webhook, summary)
+            if ntfy_topic:
+                notifications.send_ntfy(ntfy_topic, summary)
+            if hits:
+                browser_notify.fire_notification(
+                    "BNF PREMIUM: スキャン完了", f"{len(hits)}件ヒットしました"
+                )
 
-    st.markdown("<div style='font-size:0.8rem; color:#00BA7C; margin-bottom:12px;'><i class='fa-solid fa-square-check'></i> 接続済み</div>", unsafe_allow_html=True)
+    results = st.session_state.scan_results
+    if results:
+        for hit in results:
+            st.markdown(styles.scan_hit_card_html(hit), unsafe_allow_html=True)
+    elif st.session_state.get("scan_results") == []:
+        st.caption("条件に合致する銘柄はありませんでした。")
 
-    q1, q2, q3 = st.columns(3)
-    q1.button("📰 今日の相場")
-    q2.button("❓ 今買していい？")
-    q3.button("✂ 損切り判断")
+    st.markdown("---")
+    browser_notify.request_permission_button()
 
-elif selected_tab == "ログ":
-    st.markdown("<h3 style='margin:0 0 10px 0;'>売買ログ</h3>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns(3)
-    c1.metric("総ログ", 0)
-    c2.metric("買いゾーン", 0)
-    c3.metric("平均乖離率", "-- %")
+# ══════════════════════════════════════════════════
+# AI脳内タブ
+# ══════════════════════════════════════════════════
+with tab_chat:
+    if not api_key:
+        st.info("サイドバーにGemini APIキーを入力するとチャットできます。")
+    else:
+        for msg in st.session_state.chat_history:
+            with st.chat_message("user" if msg["role"] == "user" else "assistant"):
+                st.write(msg["text"])
 
-    st.button("📄 CSVエクスポート")
-    st.markdown("<div style='text-align:center; padding:40px 0; color:#71767B; font-size:0.9rem;'>ログはありません</div>", unsafe_allow_html=True)
+        prompt = st.chat_input("メッセージを入力...")
+        if prompt:
+            st.session_state.chat_history.append({"role": "user", "text": prompt})
+            snap3 = st.session_state.market_snapshot
+            context = (
+                f"地合いスコア: {snap3.down_ratio_score:.0f}/100, 日経平均: {snap3.nikkei:.0f}円"
+                if snap3 else "市場データ未取得"
+            )
+            with st.spinner("考え中..."):
+                reply = gemini_client.chat_reply(api_key, st.session_state.chat_history[:-1], prompt, context)
+            st.session_state.chat_history.append({"role": "model", "text": reply})
+            st.rerun()
 
-# ── 最下部に固定ボトムナビを表示 ──
-st.markdown(render_bottom_nav(selected_tab), unsafe_allow_html=True)
+# ══════════════════════════════════════════════════
+# ログタブ
+# ══════════════════════════════════════════════════
+with tab_log:
+    logs = storage.load_logs()
+    if logs:
+        c1, c2, c3 = st.columns(3)
+        c1.metric("記録件数", len(logs))
+        c2.metric("平均RRR", f"{sum(l.get('rrr') or 0 for l in logs) / len(logs):.2f}")
+        c3.metric("買いゾーン件数", sum(1 for l in logs if l.get("zone") == "buy"))
+
+        st.dataframe(logs, use_container_width=True)
+
+        csv_lines = ["code,sector,price,ma25,deviation_pct,zone,stop,profit_ma,rrr,shares,logged_at"]
+        for l in logs:
+            csv_lines.append(",".join(str(l.get(k, "")) for k in [
+                "code", "sector", "price", "ma25", "deviation_pct", "zone",
+                "stop", "profit_ma", "rrr", "shares", "logged_at",
+            ]))
+        st.download_button("📥 CSVエクスポート", "\n".join(csv_lines), file_name="bnf_logs.csv")
+
+        if st.button("🗑 すべてリセット"):
+            storage.clear_logs()
+            st.rerun()
+    else:
+        st.caption("まだログがありません。「ツール」タブで計算後に保存してください。")
